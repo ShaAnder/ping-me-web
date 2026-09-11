@@ -45,30 +45,53 @@ export function mapServer(
 }
 
 export async function fetchMyServers(): Promise<ServerInterface[]> {
-	const { data: memberRows, error: memberErr } = await supabase
-		.from("server_members")
-		.select("server_id");
+	try {
+		const { data: sessionData } = await supabase.auth.getSession();
+		if (!sessionData.session) {
+			console.warn("fetchMyServers: no session");
+			return [];
+		}
 
-	if (memberErr || !memberRows?.length) return [];
+		const { data: memberRows, error: memberErr } = await supabase
+			.from("server_members")
+			.select("server_id");
 
-	const ids = memberRows.map((r) => r.server_id);
+		if (memberErr) {
+			console.error("server_members", memberErr);
+			return [];
+		}
+		if (!memberRows?.length) {
+			console.warn("fetchMyServers: no memberships");
+			return [];
+		}
 
-	const { data: serverRows, error: serverErr } = await supabase
-		.from("servers")
-		.select("id, name, description, owner_id, created_at")
-		.in("id", ids);
+		const ids = memberRows.map((r) => r.server_id);
 
-	if (serverErr || !serverRows) return [];
+		const { data: serverRows, error: serverErr } = await supabase
+			.from("servers")
+			.select("id, name, description, owner_id, created_at")
+			.in("id", ids);
 
-	const { data: channelRows } = await supabase
-		.from("channels")
-		.select("id, name, server_id")
-		.in("server_id", ids);
+		if (serverErr) {
+			console.error("servers", serverErr);
+			return [];
+		}
 
-	return serverRows.map((s) =>
-		mapServer(
-			s,
-			(channelRows ?? []).filter((c) => c.server_id === s.id),
-		),
-	);
+		const { data: channelRows, error: channelErr } = await supabase
+			.from("channels")
+			.select("id, name, server_id")
+			.in("server_id", ids);
+
+		if (channelErr) console.error("channels", channelErr);
+
+		return (serverRows ?? []).map((s) =>
+			mapServer(
+				s,
+				(channelRows ?? []).filter((c) => c.server_id === s.id),
+			),
+		);
+	} catch (err) {
+		console.error("fetchMyServers", err);
+		return [];
+	}
 }
