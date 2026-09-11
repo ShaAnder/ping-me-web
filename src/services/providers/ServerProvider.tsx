@@ -1,15 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, {
-	useState,
-	useEffect,
-	ReactNode,
-	useCallback,
-	useRef,
-} from "react";
-import axios from "axios";
-import { BASE_URL } from "../../api/config";
+import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import { ServerContext } from "../../contexts/ServerContext";
 import { ServerInterface } from "../../@types/server";
+import { fetchMyServers } from "../../api/mapServer";
 
 export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 	children,
@@ -17,42 +10,16 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 	const [servers, setServers] = useState<ServerInterface[] | null>(null);
 	const [loading, setLoading] = useState(true);
 	// Track the latest request
-	const latestRequestId = useRef(0);
 
-	const refreshServers = useCallback(async (categoryName?: string) => {
-		setServers([]); // Clear servers immediately
+	const refreshServers = useCallback(async (_categoryName?: string) => {
+		setServers([]);
 		setLoading(true);
-
-		const requestId = ++latestRequestId.current;
-		try {
-			const token = localStorage.getItem("access_token");
-			if (!token) throw new Error("No access token");
-			let url = `${BASE_URL}/api/servers/`;
-			if (categoryName) url += `?category=${encodeURIComponent(categoryName)}`;
-			const res = await axios.get<ServerInterface[]>(url, {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			// Only update state if this is the latest request
-			if (latestRequestId.current === requestId) {
-				setServers(res.data);
-			}
-		} catch {
-			if (latestRequestId.current === requestId) {
-				setServers([]);
-			}
-		}
-		if (latestRequestId.current === requestId) {
-			setLoading(false);
-		}
+		setServers(await fetchMyServers());
+		setLoading(false);
 	}, []);
 
-	const addServer = async (data: any) => {
-		const token = localStorage.getItem("access_token");
-		if (!token) throw new Error("No access token");
-		await axios.post(`${BASE_URL}/api/servers/`, data, {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		await refreshServers();
+	const addServer = async (_data: any) => {
+		throw new Error("addServer is not in this slice");
 	};
 
 	useEffect(() => {
