@@ -1,0 +1,29 @@
+/* Scroll.module.css */
+.ps__rail-y,
+.ps__rail-x {
+  background: transparent !important; /* Hide the rail background */
+  opacity: 0 !important; /* Optional: hides rail unless hovering thumb */
+  transition: opacity 0.3s;
+}
+
+.ps__thumb-y,
+.ps__thumb-x {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.5
+  ) !important; /* Light grey/white like Discord */
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.ps__thumb-y:hover,
+.ps__thumb-x:hover {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.ps:hover .ps__rail-y,
+.ps:hover .ps__rail-x {
+  opacity: 1 !important; /* Only show the rail on hover */
+}

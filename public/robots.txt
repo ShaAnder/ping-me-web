@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /forgot
+
+# Disallow private/protected routes
+Disallow: /server/
+Disallow: /profile/
+Disallow: /add_server
+
+# Sitemap
+Sitemap: https://ping-me-pp5-frontend-c34a5313765d.herokuapp.com/sitemap.xml
