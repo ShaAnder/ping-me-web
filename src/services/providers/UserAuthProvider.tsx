@@ -78,13 +78,20 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 		if (error) throw error;
 	};
 
-	const signup = async (username: string, email: string, password: string) => {
-		const { error } = await supabase.auth.signUp({
+	// Returns true when Supabase is still waiting on email confirmation
+	// (no session yet), false when the user is already signed in.
+	const signup = async (
+		username: string,
+		email: string,
+		password: string,
+	): Promise<boolean> => {
+		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
 			options: { data: { username } },
 		});
 		if (error) throw error;
+		return data.session === null;
 	};
 
 	const logout = async () => {

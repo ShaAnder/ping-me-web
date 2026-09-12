@@ -47,8 +47,20 @@ const Signup: React.FC = () => {
 		{ setSubmitting, setErrors }: any,
 	) => {
 		try {
-			await signup(values.username, values.email, values.password);
-			navigate("/login");
+			// signup() returns whether Supabase actually needs the user to
+			// confirm their email (depends on the Auth settings toggle) —
+			// if confirmations are off, a session comes back immediately and
+			// there is no email to "check".
+			const needsConfirmation = await signup(
+				values.username,
+				values.email,
+				values.password,
+			);
+			if (needsConfirmation) {
+				setModalOpen(true);
+			} else {
+				navigate("/");
+			}
 		} catch (err: any) {
 			setErrors({
 				password: err?.message ?? "Registration failed. Please try again.",

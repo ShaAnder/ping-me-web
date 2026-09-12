@@ -32,7 +32,9 @@ const router = createBrowserRouter(
 			<Route path="/login" element={<Login />} />
 			<Route path="/signup" element={<Signup />} />
 			<Route path="/forgot" element={<ForgotPassword />} />
-			<Route path="/reset/:uid/:token" element={<ResetPassword />} />
+			{/* v2: Supabase recovery links land here with the session already
+					attached by the client library — no :uid/:token in the path. */}
+			<Route path="/reset" element={<ResetPassword />} />
 			<Route
 				path="/"
 				element={
