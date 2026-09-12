@@ -71,11 +71,16 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 	};
 
 	const login = async (email: string, password: string) => {
-		const { error } = await supabase.auth.signInWithPassword({
+		const { data, error } = await supabase.auth.signInWithPassword({
 			email,
 			password,
 		});
 		if (error) throw error;
+
+		// Resolve the profile fetch here rather than trusting the
+		// onAuthStateChange listener to have finished by the time this
+		// resolves
+		await applySession(data.session, false);
 	};
 
 	// Returns true when Supabase is still waiting on email confirmation
