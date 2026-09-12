@@ -15,11 +15,14 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { ServerInterface } from "../../@types/server";
 import AddChannel from "./AddChannel";
+import EditChannelModal from "./EditChannelModal";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import Modal from "../shared/Modal";
+import ServerTitleMenu from "../shared/ServerTitleMenu";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useServerContext } from "../../hooks/useServerContext";
 import { useUserServers } from "../../hooks/useUserServers";
 import { leaveServer } from "../../api/leaveServer";
@@ -38,7 +41,7 @@ const ServerChannel = ({
 	onOpenMain,
 }: ServerChannelProps) => {
 	const theme = useTheme();
-	const { serverId } = useParams();
+	const { serverId, channelId: channelIdFromRoute } = useParams();
 	const { user } = useUserAuth();
 	const navigate = useNavigate();
 
@@ -52,6 +55,10 @@ const ServerChannel = ({
 	const [deleting, setDeleting] = useState(false);
 	const [deleteError, setDeleteError] = useState("");
 	const [showAddChannel, setShowAddChannel] = useState(false);
+	const [editingChannel, setEditingChannel] = useState<{
+		id: number;
+		name: string;
+	} | null>(null);
 
 	const handleDeleteServer = async () => {
 		if (!user || !server) return;
@@ -99,9 +106,14 @@ const ServerChannel = ({
 					textAlign: "center",
 				}}
 			>
-				{server.name.length > 20
-					? `${server.name.slice(0, 20)}...`
-					: server.name}
+				<ServerTitleMenu
+					serverName={
+						server.name.length > 20
+							? `${server.name.slice(0, 20)}...`
+							: server.name
+					}
+					serverId={server.id}
+				/>
 			</Box>
 
 			{isOwner && (
@@ -207,7 +219,12 @@ const ServerChannel = ({
 						dense={true}
 					>
 						<ListItemButton
-							sx={{ minHeight: 48, fontFamily: "verdana" }}
+							sx={{
+								minHeight: 48,
+								fontFamily: "verdana",
+								display: "flex",
+								justifyContent: "space-between",
+							}}
 							onClick={() => {
 								if (onOpenMain) onOpenMain();
 								setTimeout(() => {
@@ -215,15 +232,42 @@ const ServerChannel = ({
 								}, 0);
 							}}
 						>
-							{channel.type === "text" ? (
-								<>#️ {channel.name}</>
-							) : (
-								<>🔊 {channel.name}</>
+							<Box sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+								{channel.type === "text" ? (
+									<>#️ {channel.name}</>
+								) : (
+									<>🔊 {channel.name}</>
+								)}
+							</Box>
+							{isOwner && (
+								<IconButton
+									size="small"
+									aria-label="Edit channel"
+									onClick={(e) => {
+										e.stopPropagation();
+										setEditingChannel({ id: channel.id, name: channel.name });
+									}}
+								>
+									<SettingsIcon fontSize="small" />
+								</IconButton>
 							)}
 						</ListItemButton>
 					</ListItem>
 				))}
 			</List>
+
+			<EditChannelModal
+				open={!!editingChannel}
+				onClose={() => setEditingChannel(null)}
+				channel={editingChannel}
+				onUpdated={onChannelRefresh}
+				onDeleted={(deletedId) => {
+					onChannelRefresh();
+					if (String(deletedId) === String(channelIdFromRoute)) {
+						navigate(`/server/${serverId}`);
+					}
+				}}
+			/>
 		</>
 	);
 };

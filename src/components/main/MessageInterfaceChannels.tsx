@@ -1,37 +1,21 @@
-import {
-	AppBar,
-	Toolbar,
-	Typography,
-	useTheme,
-	Button,
-	Box,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { AppBar, Toolbar, Typography, useTheme, Box } from "@mui/material";
 import { ServerInterface } from "../../@types/server";
 import { useParams } from "react-router-dom";
-import { useUserAuth } from "../../hooks/useUserAuth";
-import React from "react";
 
 interface ServerChannelProps {
 	data: ServerInterface[];
-	onDeleteChannel?: () => void;
-	deleteChannelButton?: React.ReactNode; // <-- added
 }
 
 const MessageInterfaceChannels = (props: ServerChannelProps) => {
 	const theme = useTheme();
-	const { data, onDeleteChannel, deleteChannelButton } = props;
+	const { data } = props;
 	const { serverId, channelId } = useParams();
-	const { user } = useUserAuth();
 
 	const server = data?.find((s) => String(s.id) === String(serverId));
 	const channel = server?.channel_server?.find(
 		(c) => String(c.id) === String(channelId),
 	);
 	const channelName = channel?.name || "home";
-
-	const isServerOwner =
-		!!user && !!server && String(user.id) === String(server.owner_id);
 
 	return (
 		<AppBar
@@ -58,21 +42,6 @@ const MessageInterfaceChannels = (props: ServerChannelProps) => {
 						#{channelName}
 					</Typography>
 				</Box>
-				{isServerOwner &&
-					onDeleteChannel &&
-					(deleteChannelButton ? (
-						deleteChannelButton // <-- use the custom button if provided
-					) : (
-						<Button
-							color="error"
-							startIcon={<DeleteIcon />}
-							onClick={onDeleteChannel}
-							size="small"
-							sx={{ mr: 5 }}
-						>
-							Delete
-						</Button>
-					))}
 			</Toolbar>
 		</AppBar>
 	);

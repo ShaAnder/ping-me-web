@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { Box, CardMedia, CircularProgress, useMediaQuery } from "@mui/material";
+import {
+	Box,
+	CardMedia,
+	CircularProgress,
+	IconButton,
+	useMediaQuery,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import GroupIcon from "@mui/icons-material/Group";
 
 import Nav from "./templates/Nav";
 import ServerList from "./templates/ServerList";
 import PrimaryDraw from "./templates/PrimaryDraw";
 import Main from "./templates/Main";
+import MemberList from "./templates/MemberList";
 import UserServer from "../components/serverList/UserServers";
 import MessageInterface from "../components/main/MessageInterface";
 import ServerChannel from "../components/primaryDraw/ServerChannels";
@@ -12,11 +21,11 @@ import UserPanel from "../components/shared/UserPanel";
 import { useServerContext } from "../hooks/useServerContext";
 import { useUserServers } from "../hooks/useUserServers";
 import { useParams, useNavigate } from "react-router-dom";
-import LeaveServerButton from "../components/shared/LeaveServerButton";
 import ErrorPage from "./ErrorPage";
 
 const Server = () => {
 	const navigate = useNavigate();
+	const theme = useTheme();
 	const { serverId, channelId } = useParams();
 	const {
 		servers: publicServers,
@@ -31,6 +40,7 @@ const Server = () => {
 
 	const isMobile = useMediaQuery("(max-width:767px)", { noSsr: true });
 	const [mainOpen, setMainOpen] = useState(false);
+	const [membersOpen, setMembersOpen] = useState(false);
 
 	const currentServer = useMemo(() => {
 		// Check user servers first (most likely), then public servers
@@ -100,7 +110,15 @@ const Server = () => {
 		<>
 			<Nav
 				rightAction={
-					<LeaveServerButton serverId={currentServer.id} showText={!isMobile} />
+					isMobile ? (
+						<IconButton
+							onClick={() => setMembersOpen(true)}
+							aria-label="Show members"
+							size="small"
+						>
+							<GroupIcon />
+						</IconButton>
+					) : null
 				}
 				serverName={currentServer.name}
 			/>
@@ -146,15 +164,19 @@ const Server = () => {
 				<Main
 					open={!isMobile || mainOpen}
 					onClose={isMobile ? handleCloseMain : undefined}
+					rightOffset={!isMobile ? theme.memberList.width : 0}
 				>
-					<MessageInterface
-						server={currentServer}
-						onChannelRefresh={refreshAllServers}
-						isMobile={isMobile} // Pass isMobile here!
-					/>
+					<MessageInterface server={currentServer} />
 				</Main>
 
 				<UserPanel />
+
+				<MemberList
+					open={membersOpen}
+					onClose={() => setMembersOpen(false)}
+					serverId={currentServer.id}
+					ownerId={currentServer.owner_id}
+				/>
 			</Box>
 		</>
 	);

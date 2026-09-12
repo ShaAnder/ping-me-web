@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
 	Box,
 	List,
@@ -8,10 +8,7 @@ import {
 	CircularProgress,
 	Button,
 	Stack,
-	IconButton,
-	Tooltip,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Message from "./Message";
 import MessageInterfaceChannels from "./MessageInterfaceChannels";
 import MainScroll from "./MainScroll";
@@ -25,17 +22,11 @@ import { mapMessage, MessageRow } from "../../api/mapMessages";
 
 export interface MessageInterfaceProps {
 	server: ServerInterface | null;
-	onChannelRefresh: () => void;
-	isMobile?: boolean;
 }
 
-const MessageInterface = ({
-	server,
-	onChannelRefresh,
-	isMobile = false,
-}: MessageInterfaceProps) => {
+const MessageInterface = ({ server }: MessageInterfaceProps) => {
 	const theme = useTheme();
-	const { serverId, channelId } = useParams();
+	const { channelId } = useParams();
 	const {
 		fetchMessagesForChannel,
 		messagesByChannel,
@@ -50,8 +41,6 @@ const MessageInterface = ({
 	const [deletingMsg, setDeletingMsg] = useState<MessageTypeInterface | null>(
 		null,
 	);
-	const [deletingChannel, setDeletingChannel] = useState(false);
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (channelId) fetchMessagesForChannel(channelId);
@@ -183,27 +172,6 @@ const MessageInterface = ({
 
 	const cancelDelete = () => setDeletingMsg(null);
 
-	const handleDeleteChannel = () => setDeletingChannel(true);
-	const [deleteChannelError, setDeleteChannelError] = useState<string | null>(
-		null,
-	);
-	const confirmDeleteChannel = async () => {
-		if (!channelId) return;
-		const { error } = await supabase
-			.from("channels")
-			.delete()
-			.eq("id", channelId);
-		if (error) {
-			console.error("delete channel", error);
-			setDeleteChannelError(error.message);
-			return;
-		}
-		setDeleteChannelError(null);
-		setDeletingChannel(false);
-		onChannelRefresh();
-		navigate(`/server/${serverId}`);
-	};
-
 	if (!server) {
 		return (
 			<Box sx={{ p: 4 }}>
@@ -211,30 +179,6 @@ const MessageInterface = ({
 			</Box>
 		);
 	}
-
-	const isOwner = !!user && String(server.owner_id) === String(user.id);
-
-	const deleteChannelButton = !isOwner ? null : isMobile ? (
-		<Tooltip title="Delete Channel">
-			<IconButton
-				color="error"
-				sx={{ ml: 0, mr: 2 }}
-				onClick={handleDeleteChannel}
-			>
-				<DeleteIcon />
-			</IconButton>
-		</Tooltip>
-	) : (
-		<Button
-			color="error"
-			variant="outlined"
-			startIcon={<DeleteIcon />}
-			onClick={handleDeleteChannel}
-			sx={{ ml: 2 }}
-		>
-			Delete Channel
-		</Button>
-	);
 
 	return (
 		<Box
@@ -246,11 +190,7 @@ const MessageInterface = ({
 			}}
 		>
 			<Box sx={{ flexShrink: 0 }}>
-				<MessageInterfaceChannels
-					data={[server]}
-					onDeleteChannel={handleDeleteChannel}
-					deleteChannelButton={deleteChannelButton}
-				/>
+				<MessageInterfaceChannels data={[server]} />
 			</Box>
 
 			{channelId === undefined ? (
@@ -358,43 +298,6 @@ const MessageInterface = ({
 					</Stack>
 				}
 				children={<></>}
-			/>
-			<Modal
-				open={deletingChannel}
-				onClose={() => {
-					setDeletingChannel(false);
-					setDeleteChannelError(null);
-				}}
-				title="Delete this channel?"
-				actions={
-					<Stack direction="row" spacing={2}>
-						<Button
-							onClick={() => {
-								setDeletingChannel(false);
-								setDeleteChannelError(null);
-							}}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={confirmDeleteChannel}
-							color="error"
-							variant="contained"
-						>
-							Delete
-						</Button>
-					</Stack>
-				}
-				children={
-					<Box>
-						Are you sure you want to delete this channel? This cannot be undone.
-						{deleteChannelError && (
-							<Box sx={{ color: "error.main", mt: 2, fontSize: 14 }}>
-								{deleteChannelError}
-							</Box>
-						)}
-					</Box>
-				}
 			/>
 		</Box>
 	);

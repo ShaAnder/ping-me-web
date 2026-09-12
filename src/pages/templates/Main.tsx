@@ -7,9 +7,18 @@ type MainProps = {
 	children: ReactNode;
 	open?: boolean;
 	onClose?: () => void;
+	// Extra right-hand offset in px, for pages with a permanent right-side
+	// panel (e.g. Server.tsx's member list) that Main needs to leave room
+	// for. Home.tsx/Popular.tsx don't pass this and are unaffected.
+	rightOffset?: number;
 };
 
-const Main = ({ children, open = true, onClose }: MainProps) => {
+const Main = ({
+	children,
+	open = true,
+	onClose,
+	rightOffset = 0,
+}: MainProps) => {
 	const theme = useTheme();
 	const isMobile = useMediaQuery("(max-width:767px)", { noSsr: true });
 
@@ -37,6 +46,7 @@ const Main = ({ children, open = true, onClose }: MainProps) => {
 					width: isMobile
 						? `calc(100vw - ${theme.serverList.width}px)`
 						: "auto",
+					mr: !isMobile && rightOffset ? `${rightOffset}px` : 0,
 					height: isMobile ? "100vh" : `calc(100vh - ${theme.nav.height}px)`,
 					bgcolor: "background.default",
 					zIndex: isMobile ? 1500 : "auto",
