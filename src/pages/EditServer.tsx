@@ -5,6 +5,7 @@ import {
 	CircularProgress,
 	Alert,
 	Button,
+	TextField,
 } from "@mui/material";
 import Form, { Field } from "../components/shared/Form";
 import { validateFormFields } from "../utils/validateForm";
@@ -304,6 +305,34 @@ const EditServer: React.FC = () => {
 					<Alert severity="success" sx={{ mb: 2 }}>
 						{submitSuccess}
 					</Alert>
+				)}
+
+				{server && (
+					<Box sx={{ mb: 3 }}>
+						<Typography variant="body2" fontWeight={600} mb={1}>
+							Invite Link
+						</Typography>
+						<Box sx={{ display: "flex", gap: 1 }}>
+							<TextField
+								fullWidth
+								size="small"
+								value={`${window.location.origin}/join/${server.id}`}
+								InputProps={{ readOnly: true }}
+							/>
+							<Button
+								variant="outlined"
+								onClick={() => {
+									navigator.clipboard.writeText(
+										`${window.location.origin}/join/${server.id}`,
+									);
+									setSubmitSuccess("Invite link copied!");
+									setTimeout(() => setSubmitSuccess(null), 2000);
+								}}
+							>
+								Copy
+							</Button>
+						</Box>
+					</Box>
 				)}
 
 				<Form

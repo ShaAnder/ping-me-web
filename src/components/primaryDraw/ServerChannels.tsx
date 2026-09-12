@@ -11,6 +11,7 @@ import {
 	TextField,
 	Button,
 	Divider,
+	Snackbar,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { ServerInterface } from "../../@types/server";
@@ -19,10 +20,8 @@ import EditChannelModal from "./EditChannelModal";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import Modal from "../shared/Modal";
 import ServerTitleMenu from "../shared/ServerTitleMenu";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useServerContext } from "../../hooks/useServerContext";
 import { useUserServers } from "../../hooks/useUserServers";
 import { leaveServer } from "../../api/leaveServer";
@@ -59,6 +58,7 @@ const ServerChannel = ({
 		id: number;
 		name: string;
 	} | null>(null);
+	const [inviteCopied, setInviteCopied] = useState(false);
 
 	const handleDeleteServer = async () => {
 		if (!user || !server) return;
@@ -91,8 +91,8 @@ const ServerChannel = ({
 					height: "50px",
 					display: "flex",
 					alignItems: "center",
-					justifyContent: "center",
-					p: 1,
+					justifyContent: "space-between",
+					px: 1.5,
 					fontSize: 16,
 					letterSpacing: 1,
 					fontFamily: "verdana",
@@ -100,10 +100,7 @@ const ServerChannel = ({
 					position: "sticky",
 					top: 0,
 					backgroundColor: theme.palette.background.default,
-					whiteSpace: "nowrap",
-					overflow: "hidden",
-					textOverflow: "ellipsis",
-					textAlign: "center",
+					zIndex: 1300,
 				}}
 			>
 				<ServerTitleMenu
@@ -113,48 +110,33 @@ const ServerChannel = ({
 							: server.name
 					}
 					serverId={server.id}
+					isOwner={isOwner}
+					onAddChannel={() => setShowAddChannel(true)}
+					onDeleteServer={() => setShowDeleteModal(true)}
 				/>
+				<Tooltip title="Copy invite link">
+					<IconButton
+						size="small"
+						aria-label="Copy invite link"
+						onClick={() => {
+							navigator.clipboard.writeText(
+								`${window.location.origin}/join/${server.id}`,
+							);
+							setInviteCopied(true);
+						}}
+					>
+						<ContentCopyIcon fontSize="small" />
+					</IconButton>
+				</Tooltip>
 			</Box>
 
-			{isOwner && (
-				<Box
-					display="flex"
-					alignItems="center"
-					justifyContent="space-evenly"
-					sx={{ width: "100%", mt: 0, mb: 0 }}
-				>
-					<Tooltip title="Add Channel">
-						<IconButton
-							color="success"
-							size="large"
-							onClick={() => setShowAddChannel(true)}
-							sx={{ borderRadius: 0, p: 1, m: 0, width: "33.33%" }}
-						>
-							<AddCircleIcon sx={{ fontSize: 28, color: "#43a047" }} />
-						</IconButton>
-					</Tooltip>
-					<Tooltip title="Edit Server">
-						<IconButton
-							color="primary"
-							size="large"
-							onClick={() => navigate(`/server/${server.id}/edit`)}
-							sx={{ borderRadius: 0, p: 1, m: 0, width: "33.33%" }}
-						>
-							<EditIcon sx={{ fontSize: 28, color: "#1976d2" }} />
-						</IconButton>
-					</Tooltip>
-					<Tooltip title="Delete Server">
-						<IconButton
-							color="error"
-							size="large"
-							onClick={() => setShowDeleteModal(true)}
-							sx={{ borderRadius: 0, p: 1, m: 0, width: "33.33%" }}
-						>
-							<DeleteIcon sx={{ fontSize: 28, color: "#d32f2f" }} />
-						</IconButton>
-					</Tooltip>
-				</Box>
-			)}
+			<Snackbar
+				open={inviteCopied}
+				autoHideDuration={2000}
+				onClose={() => setInviteCopied(false)}
+				message="Invite link copied!"
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+			/>
 
 			{/* Add Channel Modal */}
 			<AddChannel

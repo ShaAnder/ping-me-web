@@ -21,6 +21,8 @@ import EditServer from "./pages/EditServer";
 import ProtectedRoute from "./services/ProtectedRoute";
 import ServerOwnerProtectedRoute from "./services/ServerOwnerProtectedRoute";
 import AddServer from "./pages/AddServer";
+import CreateOrJoinServer from "./pages/CreateOrJoinServer";
+import JoinServer from "./pages/JoinServer";
 import { CategoriesProvider } from "./services/providers/CatgoryProvider";
 import { MessagesProvider } from "./services/providers/MessagesProvider";
 import ErrorPage from "./pages/ErrorPage";
@@ -33,7 +35,7 @@ const router = createBrowserRouter(
 			<Route path="/signup" element={<Signup />} />
 			<Route path="/forgot" element={<ForgotPassword />} />
 			{/* v2: Supabase recovery links land here with the session already
-					attached by the client library — no :uid/:token in the path. */}
+			    attached by the client library — no :uid/:token in the path. */}
 			<Route path="/reset" element={<ResetPassword />} />
 			<Route
 				path="/"
@@ -77,10 +79,29 @@ const router = createBrowserRouter(
 				errorElement={<ErrorPage />}
 			/>
 			<Route
+				path="/create-or-join"
+				element={
+					<ProtectedRoute>
+						<CreateOrJoinServer />
+					</ProtectedRoute>
+				}
+				errorElement={<ErrorPage />}
+			/>
+			<Route
 				path="/add_server"
 				element={
 					<ProtectedRoute>
 						<AddServer />
+					</ProtectedRoute>
+				}
+				errorElement={<ErrorPage />}
+			/>
+			{/* Invite links point here — auto-joins then redirects into the server. */}
+			<Route
+				path="/join/:serverId"
+				element={
+					<ProtectedRoute>
+						<JoinServer />
 					</ProtectedRoute>
 				}
 				errorElement={<ErrorPage />}

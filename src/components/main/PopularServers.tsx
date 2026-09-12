@@ -5,9 +5,9 @@ import { useServerContext } from "../../hooks/useServerContext";
 import { useUserServers } from "../../hooks/useUserServers";
 import { ServerInterface } from "../../@types/server";
 import PopularServerCard from "./PopularServerCard";
-import { supabase } from "../../api/supabaseClient";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import { leaveServer } from "../../api/leaveServer";
+import { joinServer } from "../../api/joinServer";
 
 const ExplorePopularServers: React.FC = () => {
 	const { categoryName } = useParams();
@@ -29,15 +29,12 @@ const ExplorePopularServers: React.FC = () => {
 	const handleJoinServer = async (server: ServerInterface) => {
 		if (!user) return;
 		setActionInProgress(String(server.id));
-		const { data: sessionData } = await supabase.auth.getSession();
-		const uid = sessionData.session?.user.id;
-		if (!uid) return;
-		const { error } = await supabase.from("server_members").insert({
-			server_id: server.id,
-			user_id: uid,
-		});
-		if (error) console.error("join", error);
-		await refreshUserServers();
+		try {
+			await joinServer(String(server.id));
+			await refreshUserServers();
+		} catch (err) {
+			console.error("join", err);
+		}
 		setActionInProgress(null);
 	};
 
