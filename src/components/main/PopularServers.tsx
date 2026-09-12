@@ -7,6 +7,7 @@ import { ServerInterface } from "../../@types/server";
 import PopularServerCard from "./PopularServerCard";
 import { supabase } from "../../api/supabaseClient";
 import { useUserAuth } from "../../hooks/useUserAuth";
+import { leaveServer } from "../../api/leaveServer";
 
 const ExplorePopularServers: React.FC = () => {
 	const { categoryName } = useParams();
@@ -28,9 +29,12 @@ const ExplorePopularServers: React.FC = () => {
 	const handleJoinServer = async (server: ServerInterface) => {
 		if (!user) return;
 		setActionInProgress(String(server.id));
+		const { data: sessionData } = await supabase.auth.getSession();
+		const uid = sessionData.session?.user.id;
+		if (!uid) return;
 		const { error } = await supabase.from("server_members").insert({
 			server_id: server.id,
-			user_id: user.id,
+			user_id: uid,
 		});
 		if (error) console.error("join", error);
 		await refreshUserServers();
@@ -38,15 +42,13 @@ const ExplorePopularServers: React.FC = () => {
 	};
 
 	const handleLeaveServer = async (server: ServerInterface) => {
-		if (!user) return;
 		setActionInProgress(String(server.id));
-		const { error } = await supabase
-			.from("server_members")
-			.delete()
-			.eq("server_id", server.id)
-			.eq("user_id", user.id);
-		if (error) console.error("leave", error);
-		await refreshUserServers();
+		try {
+			await leaveServer(String(server.id));
+			await refreshUserServers();
+		} catch (err) {
+			console.error("leave", err);
+		}
 		setActionInProgress(null);
 	};
 

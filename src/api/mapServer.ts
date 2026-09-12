@@ -56,7 +56,8 @@ export async function fetchMyServers(): Promise<ServerInterface[]> {
 
 		const { data: memberRows, error: memberErr } = await supabase
 			.from("server_members")
-			.select("server_id");
+			.select("server_id")
+			.eq("user_id", sessionData.session.user.id);
 
 		if (memberErr) {
 			console.error("server_members", memberErr);
@@ -125,12 +126,11 @@ export async function fetchAllServers(): Promise<ServerInterface[]> {
 		const mapped = serverRows.map((s) => {
 			const countRaw = (s as { server_members?: { count: number }[] })
 				.server_members;
-			const num_members = countRaw?.[0]?.count ?? 0;
 			const server = mapServer(
 				s,
 				(channelRows ?? []).filter((c) => c.server_id === s.id),
 			);
-			server.num_members = num_members;
+			server.num_members = countRaw?.[0]?.count ?? 0;
 			return server;
 		});
 
