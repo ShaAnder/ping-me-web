@@ -1,8 +1,8 @@
 import React, { useState, ReactNode, useCallback } from "react";
-import axios from "axios";
-import { BASE_URL } from "../../api/config";
 import { MessagesContext } from "../../contexts/MessagesContext";
 import { MessageTypeInterface } from "../../@types/message";
+import { supabase } from "../../api/supabaseClient";
+import { mapMessage, MessageRow } from "../../api/mapMessages";
 
 export const MessagesProvider: React.FC<{ children: ReactNode }> = ({
 	children,
@@ -15,20 +15,27 @@ export const MessagesProvider: React.FC<{ children: ReactNode }> = ({
 	const fetchMessagesForChannel = useCallback(async (channelId: string) => {
 		setLoading(true);
 		try {
-			const token = localStorage.getItem("access_token");
-			if (!token) throw new Error("No access token");
-			const res = await axios.get<MessageTypeInterface[]>(
-				`${BASE_URL}/api/messages/?channel_id=${channelId}`,
-				{ headers: { Authorization: `Bearer ${token}` } }
-			);
+			const { data, error } = await supabase
+				.from("messages")
+				.select(
+					"id, channel_id, sender_id, content, created_at, updated_at, profiles(id, username)",
+				)
+				.eq("channel_id", channelId)
+				.order("created_at", { ascending: true });
+
+			if (error) {
+				console.error("fetchMessagesForChannel", error);
+				setMessagesByChannel((prev) => ({ ...prev, [channelId]: [] }));
+				return;
+			}
+
 			setMessagesByChannel((prev) => ({
 				...prev,
-				[channelId]: res.data,
+				[channelId]: ((data ?? []) as unknown as MessageRow[]).map(mapMessage),
 			}));
-		} catch {
-			setMessagesByChannel((prev) => ({ ...prev, [channelId]: [] }));
+		} finally {
+			setLoading(false);
 		}
-		setLoading(false);
 	}, []);
 
 	return (
