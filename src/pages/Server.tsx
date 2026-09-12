@@ -35,12 +35,12 @@ const Server = () => {
 	const currentServer = useMemo(() => {
 		// Check user servers first (most likely), then public servers
 		const userServer = userServers?.find(
-			(s) => String(s.id) === String(serverId)
+			(s) => String(s.id) === String(serverId),
 		);
 		if (userServer) return userServer;
 
 		const publicServer = publicServers?.find(
-			(s) => String(s.id) === String(serverId)
+			(s) => String(s.id) === String(serverId),
 		);
 		return publicServer || null;
 	}, [userServers, publicServers, serverId]);
@@ -58,7 +58,7 @@ const Server = () => {
 			currentServer &&
 			channelId &&
 			!currentServer.channel_server.some(
-				(channel) => String(channel.id) === String(channelId)
+				(channel) => String(channel.id) === String(channelId),
 			)
 		) {
 			navigate(`/server/${serverId}`);
@@ -110,16 +110,26 @@ const Server = () => {
 				</ServerList>
 
 				<PrimaryDraw>
-					<Box sx={{ mb: 0, textAlign: "center" }}>
+					<Box
+						sx={{
+							mb: 0,
+							textAlign: "center",
+							overflow: "hidden",
+							bgcolor: "background.paper",
+							lineHeight: 0,
+						}}
+					>
 						<CardMedia
 							component="img"
 							image={currentServer.server_image_urls?.banner_image_url}
 							alt={currentServer.name}
 							sx={{
 								width: "100%",
-								height: 137,
+								height: { xs: 96, md: 137 },
 								objectFit: "cover",
+								objectPosition: "center",
 								display: isMobile ? "none" : "block",
+								verticalAlign: "top",
 							}}
 						/>
 					</Box>

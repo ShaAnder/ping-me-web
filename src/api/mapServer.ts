@@ -99,3 +99,45 @@ export async function fetchMyServers(): Promise<ServerInterface[]> {
 		return [];
 	}
 }
+
+export async function fetchAllServers(): Promise<ServerInterface[]> {
+	try {
+		const { data: sessionData } = await supabase.auth.getSession();
+		if (!sessionData.session) return [];
+
+		const { data: serverRows, error } = await supabase
+			.from("servers")
+			.select(
+				"id, name, description, owner_id, created_at, icon_url, banner_url, server_members(count)",
+			);
+
+		if (error || !serverRows) {
+			console.error("fetchAllServers", error);
+			return [];
+		}
+
+		const ids = serverRows.map((s) => s.id);
+		const { data: channelRows } = await supabase
+			.from("channels")
+			.select("id, name, server_id")
+			.in("server_id", ids);
+
+		const mapped = serverRows.map((s) => {
+			const countRaw = (s as { server_members?: { count: number }[] })
+				.server_members;
+			const num_members = countRaw?.[0]?.count ?? 0;
+			const server = mapServer(
+				s,
+				(channelRows ?? []).filter((c) => c.server_id === s.id),
+			);
+			server.num_members = num_members;
+			return server;
+		});
+
+		mapped.sort((a, b) => (b.num_members ?? 0) - (a.num_members ?? 0));
+		return mapped;
+	} catch (err) {
+		console.error("fetchAllServers", err);
+		return [];
+	}
+}

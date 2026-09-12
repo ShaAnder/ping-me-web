@@ -2,7 +2,7 @@
 import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import { ServerContext } from "../../contexts/ServerContext";
 import { ServerInterface } from "../../@types/server";
-import { fetchMyServers } from "../../api/mapServer";
+import { fetchAllServers } from "../../api/mapServer";
 import { useUserAuth } from "../../hooks/useUserAuth";
 import { supabase } from "../../api/supabaseClient";
 
@@ -22,7 +22,7 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 					setServers([]);
 					return;
 				}
-				setServers(await fetchMyServers());
+				setServers(await fetchAllServers());
 			} finally {
 				setLoading(false);
 			}
