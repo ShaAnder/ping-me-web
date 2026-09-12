@@ -8,7 +8,11 @@ Portfolio 5 project as part of the Diploma in Full Stack Software Development by
 
 Ping me is a lightweight discord clone that allows the user to view signup and join chatrooms to chat with other users, the sole aim of the project is to document my skills with react/typescript mui and django rest framework
 
-Visit the delployed site! - [PingMe!](https://ping-me-pp5-frontend-c34a5313765d.herokuapp.com)
+> **Reintegration note:** this project originally shipped on a Django REST Framework backend with a Code Institute-provided Postgres database, hosted on Heroku. When the diploma database and Heroku hosting were retired, the backend was reintegrated onto **Supabase** (Postgres, Auth, Realtime, Storage, Edge Functions), with the frontend now deployed on **Vercel**. The sections below describe the app as it stands today post-reintegration; the original Django backend is kept in `legacy/` for reference. Everything about the site objectives, design, and UX below still reflects the original vision — only the plumbing underneath changed.
+
+Visit the deployed site! - [PingMe!](ping-me-pp5.vercel.app)
+
+Original diploma-era deploy (Django/Heroku, retired): ~~[PingMe!](https://ping-me-pp5-frontend-c34a5313765d.herokuapp.com)~~
 
 ## CONTENTS
 
@@ -53,11 +57,11 @@ I wanted to make the site visually appealling site that allowed the user to quic
 
 - ### Take full advantage of backend functionality
 
-Django is a fantastic tool, and the capabilities it brings to a fullstack app like this are unrivaled, so i knew i needed it in this project, add onto that websockets and channels allwoed me to create a truly amazing realtime chat application
+Django is a fantastic tool, and the capabilities it brings to a fullstack app like this are unrivaled, so i knew i needed it in this project, add onto that websockets and channels allwoed me to create a truly amazing realtime chat application. Post-reintegration, this same realtime chat experience is powered by Supabase's Realtime engine instead of Django Channels, with row-level security replacing the old view-level permission checks.
 
 - ### Store data on an external cloud database
 
-WE used cloudinary for avatar hosting, a code institute db for the models and heroku for the app hosting
+We originally used Cloudinary for avatar hosting, a Code Institute-provided Postgres db for the models, and Heroku for app hosting. Since the reintegration, images live in Supabase Storage and the database is Supabase's managed Postgres — same idea (cloud-hosted, out of my own infrastructure to manage), different provider.
 
 ---
 
@@ -141,7 +145,7 @@ allowing a user to create edit and delete their account should they so choose
 
 ![Explore Categories](readme_assets/examples/explore.png)
 
-This is where the use can go and explore the various server categories on offer to find new places to check out
+This is where the use can go and explore the various server categories on offer to find new places to check out. **Post-reintegration status:** category data itself hasn't been rebuilt on the new backend yet — see [Future Features](#future-features) — so Explore currently lists all public servers rather than filtering by category.
 
 ![Server List](readme_assets/examples/serverlist.png)
 
@@ -155,8 +159,7 @@ to a formik integrated form component designed by me that takes custom input fie
 
 ![Chat Room](readme_assets/examples/chatroom.png)
 
-This is where users can chat with each other, the app hosts a backend redis powered websocket connector that sends and
-broadcasts messages in real time
+This is where users can chat with each other. Messages send and broadcast in real time via Supabase Realtime (originally a Redis-backed Django Channels websocket connector, before the reintegration)
 
 ![Modals in action](readme_assets/examples/modal.png)
 
@@ -241,6 +244,7 @@ Full testing can be found in the testing.md file linked [here](https://github.co
 - Kicking users out of servers
 - Viewing memeber profiles
 - Category recommendations
+- Private servers (existed pre-reintegration, not yet rebuilt on the Supabase schema)
 
 I also want to work on code optimization and better stylistic choices, this is an app i loved making and want to work more on
 
@@ -256,23 +260,41 @@ I also want to work on code optimization and better stylistic choices, this is a
 
 Here are the technologies used to build this project:
 
-- [Vs code](https://codeanywhere.com/) To build and create this project
+- [VS Code](https://code.visualstudio.com/) To build and create this project
 - [Github](https://github.com) To host and store the data for the site.
-- [PEP8 Validator](https://pep8ci.herokuapp.com/) Used to check python code for errors
 - [HTML & CSS Validator](https://jigsaw.w3.org/css-validator/) for html and css validation
-- [ElephandSQL](https://www.elephantsql.com/) Used to store PostgreSQL database.
-- [Cloudinary](https://cloudinary.com/) Used as cloud storage for images uploaded as part of the blog posts
+- [Supabase](https://supabase.com/) Postgres database, Auth, Realtime, Storage, and Edge Functions — replaced ElephantSQL/Cloudinary/Django post-reintegration
+- [Vercel](https://vercel.com/) Used to deploy the frontend — replaced Heroku post-reintegration
+- [Vite](https://vitejs.dev/) Frontend build tool and dev server
+
+<details>
+<summary>Original diploma-era stack (retired)</summary>
+
+- [PEP8 Validator](https://pep8ci.herokuapp.com/) Used to check python code for errors
+- [ElephantSQL](https://www.elephantsql.com/) Used to store PostgreSQL database
+- [Cloudinary](https://cloudinary.com/) Used as cloud storage for images
 - [Heroku](https://id.heroku.com/) Used to deploy the project
+
+</details>
 
 # Programming Languages, Frameworks and Libraries Used
 
 - [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)
 - [CSS](https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/CSS_basics)
-- [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>)
-- [Django](https://www.djangoproject.com/)
-- [MUI Material](https://mui.com)
-- [React](https://react.dev)
 - [Typescript](https://www.typescriptlang.org)
+- [React](https://react.dev)
+- [MUI Material](https://mui.com)
+- [Supabase JS](https://supabase.com/docs/reference/javascript/introduction)
+- [Formik](https://formik.org/)
+
+<details>
+<summary>Original diploma-era backend (retired, kept in <code>legacy/</code>)</summary>
+
+- [Python](<https://en.wikipedia.org/wiki/Python_(programming_language)>)
+- [Django](https://www.djangoproject.com/) / Django REST Framework
+- Django Channels (websockets)
+
+</details>
 
 ---
 
@@ -305,7 +327,25 @@ To create a clone you do the following;
 5. Add Git Clone with the copy of the repository name
 6. Clone has been created
 
-### Repository deployment via Heroku
+### Repository deployment via Vercel (current)
+
+- Import this repo into [Vercel](https://vercel.com/) as a new project
+- In the project's Environment Variables settings, add:
+
+1. `VITE_SUPABASE_URL` — your Supabase project's API URL
+2. `VITE_SUPABASE_ANON_KEY` — your Supabase project's anon/public key
+
+- Deploy — Vercel builds and deploys automatically on every push to the connected branch, with preview deployments for other branches/PRs
+
+### Backend setup via Supabase (current)
+
+- Create a project at [Supabase](https://supabase.com/)
+- Apply the schema by running the SQL files in `ping-me-api/supabase/migrations/` in order, either through the SQL editor in the dashboard or via `supabase db push`
+- Deploy the account-deletion Edge Function: `supabase functions deploy delete-user` (no secrets to configure — `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` are injected automatically)
+- Under Authentication → URL Configuration, add your local and deployed origins with `/reset` appended (e.g. `http://localhost:5173/reset`, `https://your-app.vercel.app/reset`), or password reset emails won't redirect correctly
+
+<details>
+<summary>Original diploma-era deployment via Heroku (retired)</summary>
 
 - On the [Heroku Dashboard](https://dashboard.heroku.com) page, click New and then select Create New App from the drop-down menu.
 - When the next page loads insert the App name and Choose a region. Then click 'Create app'
@@ -320,13 +360,13 @@ To create a clone you do the following;
 7. IP
 8. SECRET KEY
 
-### Deployment of the app
-
 - Click on the Deploy tab and select Github-Connect to Github.
 - Enter the repository name and click Search.
 - Choose the repository that holds the correct files and click Connect.
 - A choice is offered between manual or automatic deployment whereby the app is updated when changes are pushed to GitHub.
 - Once the deployment method has been chosen the app will be built and can be launched by clicking the Open app button which should appear below the build information window, alternatively, there is another button located in the top right of the page.
+
+</details>
 
 ---
 

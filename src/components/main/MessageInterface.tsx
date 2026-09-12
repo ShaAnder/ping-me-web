@@ -184,7 +184,21 @@ const MessageInterface = ({
 	const cancelDelete = () => setDeletingMsg(null);
 
 	const handleDeleteChannel = () => setDeletingChannel(true);
+	const [deleteChannelError, setDeleteChannelError] = useState<string | null>(
+		null,
+	);
 	const confirmDeleteChannel = async () => {
+		if (!channelId) return;
+		const { error } = await supabase
+			.from("channels")
+			.delete()
+			.eq("id", channelId);
+		if (error) {
+			console.error("delete channel", error);
+			setDeleteChannelError(error.message);
+			return;
+		}
+		setDeleteChannelError(null);
 		setDeletingChannel(false);
 		onChannelRefresh();
 		navigate(`/server/${serverId}`);
@@ -198,7 +212,9 @@ const MessageInterface = ({
 		);
 	}
 
-	const deleteChannelButton = isMobile ? (
+	const isOwner = !!user && String(server.owner_id) === String(user.id);
+
+	const deleteChannelButton = !isOwner ? null : isMobile ? (
 		<Tooltip title="Delete Channel">
 			<IconButton
 				color="error"
@@ -345,11 +361,21 @@ const MessageInterface = ({
 			/>
 			<Modal
 				open={deletingChannel}
-				onClose={() => setDeletingChannel(false)}
+				onClose={() => {
+					setDeletingChannel(false);
+					setDeleteChannelError(null);
+				}}
 				title="Delete this channel?"
 				actions={
 					<Stack direction="row" spacing={2}>
-						<Button onClick={() => setDeletingChannel(false)}>Cancel</Button>
+						<Button
+							onClick={() => {
+								setDeletingChannel(false);
+								setDeleteChannelError(null);
+							}}
+						>
+							Cancel
+						</Button>
 						<Button
 							onClick={confirmDeleteChannel}
 							color="error"
@@ -362,6 +388,11 @@ const MessageInterface = ({
 				children={
 					<Box>
 						Are you sure you want to delete this channel? This cannot be undone.
+						{deleteChannelError && (
+							<Box sx={{ color: "error.main", mt: 2, fontSize: 14 }}>
+								{deleteChannelError}
+							</Box>
+						)}
 					</Box>
 				}
 			/>

@@ -56,7 +56,7 @@ const ServerOwnerProtectedRoute = ({
 	}
 
 	// Check if the current user is the owner
-	if (server.owner_id !== user.id) {
+	if (String(server.owner_id) !== String(user.id)) {
 		return (
 			<ErrorPage
 				error={{
