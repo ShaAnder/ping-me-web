@@ -12,6 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { MessageTypeInterface } from "../../@types/message";
 import { useUserAuth } from "../../hooks/useUserAuth";
+import { useProfiles } from "../../hooks/useProfies";
 
 interface MessageProps {
 	message: MessageTypeInterface;
@@ -21,6 +22,10 @@ interface MessageProps {
 
 const Message = ({ message, onEdit, onDelete }: MessageProps) => {
 	const { user } = useUserAuth();
+	const { profilesById } = useProfiles();
+	const live = profilesById[String(message.user?.id)];
+	const username = live?.username ?? message.user?.username;
+	const avatar = live?.avatar_url ?? message.user?.image_url;
 
 	const formatTimeStamp = (timestamp: string) => {
 		const date = new Date(Date.parse(timestamp));
@@ -46,10 +51,8 @@ const Message = ({ message, onEdit, onDelete }: MessageProps) => {
 	return (
 		<ListItem alignItems="flex-start">
 			<ListItemAvatar>
-				<Avatar alt={message.user?.username} src={message.user?.image_url}>
-					{!message.user?.image_url && message.user?.username
-						? message.user.username[0].toUpperCase()
-						: null}
+				<Avatar alt={username} src={avatar || undefined}>
+					{!avatar && username ? username[0].toUpperCase() : null}
 				</Avatar>
 			</ListItemAvatar>
 			<ListItemText
@@ -61,7 +64,7 @@ const Message = ({ message, onEdit, onDelete }: MessageProps) => {
 							color="text.primary"
 							sx={{ fontWeight: "600", mr: 1 }}
 						>
-							{message.user?.username}
+							{username}
 						</Typography>
 						<Typography
 							component="span"

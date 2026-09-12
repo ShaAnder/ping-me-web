@@ -3,6 +3,7 @@ import { ServerInterface } from "../../@types/server";
 import { UserServerContext } from "../../contexts/UserServerContext";
 import { fetchMyServers } from "../../api/mapServer";
 import { useUserAuth } from "../../hooks/useUserAuth";
+import { supabase } from "../../api/supabaseClient";
 
 export const UserServerProvider: React.FC<{ children: ReactNode }> = ({
 	children,
@@ -26,8 +27,27 @@ export const UserServerProvider: React.FC<{ children: ReactNode }> = ({
 
 	useEffect(() => {
 		if (authLoading) return;
-		fetchServers();
+		void fetchServers();
 	}, [authLoading, fetchServers]);
+
+	useEffect(() => {
+		if (!isAuthenticated) return;
+
+		const channel = supabase
+			.channel("servers-live")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "servers" },
+				() => {
+					void fetchServers();
+				},
+			)
+			.subscribe();
+
+		return () => {
+			supabase.removeChannel(channel);
+		};
+	}, [isAuthenticated, fetchServers]);
 
 	return (
 		<UserServerContext.Provider

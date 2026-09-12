@@ -24,6 +24,7 @@ import AddServer from "./pages/AddServer";
 import { CategoriesProvider } from "./services/providers/CatgoryProvider";
 import { MessagesProvider } from "./services/providers/MessagesProvider";
 import ErrorPage from "./pages/ErrorPage";
+import { ProfilesProvider } from "./services/providers/ProfilesProvider";
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
@@ -89,25 +90,27 @@ const router = createBrowserRouter(
 					<ErrorPage error={{ status: 404, message: "Page not found" }} />
 				}
 			/>
-		</>
-	)
+		</>,
+	),
 );
 
 const App: React.FC = () => {
 	return (
 		<>
 			<UserAuthProvider>
-				<CategoriesProvider>
-					<MessagesProvider>
-						<ServerProvider>
-							<UserServerProvider>
-								<ToggleColorMode>
-									<RouterProvider router={router} />
-								</ToggleColorMode>
-							</UserServerProvider>
-						</ServerProvider>
-					</MessagesProvider>
-				</CategoriesProvider>
+				<ProfilesProvider>
+					<CategoriesProvider>
+						<MessagesProvider>
+							<ServerProvider>
+								<UserServerProvider>
+									<ToggleColorMode>
+										<RouterProvider router={router} />
+									</ToggleColorMode>
+								</UserServerProvider>
+							</ServerProvider>
+						</MessagesProvider>
+					</CategoriesProvider>
+				</ProfilesProvider>
 			</UserAuthProvider>
 		</>
 	);

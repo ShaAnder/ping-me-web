@@ -7,6 +7,8 @@ type ServerRow = {
 	description: string | null;
 	owner_id: string | null;
 	created_at: string;
+	icon_url: string | null;
+	banner_url: string | null;
 };
 
 type ChannelRow = {
@@ -28,10 +30,10 @@ export function mapServer(
 		category_name: "",
 		created_at: server.created_at,
 		owner: server.owner_id ?? "",
-		owner_id: 0,
+		owner_id: server.owner_id as unknown as number,
 		server_image_urls: {
-			server_icon_url: "",
-			banner_image_url: "",
+			server_icon_url: server.icon_url ?? "",
+			banner_image_url: server.banner_url ?? "",
 		},
 		channel_server: channels.map((c) => ({
 			id: c.id as unknown as number,
@@ -69,7 +71,9 @@ export async function fetchMyServers(): Promise<ServerInterface[]> {
 
 		const { data: serverRows, error: serverErr } = await supabase
 			.from("servers")
-			.select("id, name, description, owner_id, created_at")
+			.select(
+				"id, name, description, owner_id, created_at, icon_url, banner_url",
+			)
 			.in("id", ids);
 
 		if (serverErr) {

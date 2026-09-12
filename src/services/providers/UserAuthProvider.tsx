@@ -2,6 +2,7 @@ import React, { useState, useEffect, ReactNode } from "react";
 import { UserInterface } from "../../@types/user";
 import { UserAuthContext } from "../../contexts/UserAuthContext";
 import { supabase } from "../../api/supabaseClient";
+import type { Session } from "@supabase/supabase-js";
 
 export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 	children,
@@ -10,10 +11,9 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [loading, setLoading] = useState(true);
 
-	const refreshUser = async () => {
-		setLoading(true);
-		const { data: sessionData } = await supabase.auth.getSession();
-		const session = sessionData.session;
+	const applySession = async (session: Session | null, showLoader: boolean) => {
+		if (showLoader) setLoading(true);
+
 		if (!session) {
 			setUser(null);
 			setIsAuthenticated(false);
@@ -23,7 +23,7 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 
 		const { data: profile, error } = await supabase
 			.from("profiles")
-			.select("id, username")
+			.select("id, username, avatar_url, bio, location")
 			.eq("id", session.user.id)
 			.maybeSingle();
 
@@ -38,9 +38,10 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 			id: profile.id as unknown as number,
 			username: profile.username,
 			email: session.user.email ?? "",
-			image: "",
-			location: "",
-			content: "",
+			image: profile.avatar_url ?? "",
+			image_url: profile.avatar_url ?? "",
+			location: profile.location ?? "",
+			content: profile.bio ?? "",
 			servers: [],
 		});
 		setIsAuthenticated(true);
@@ -48,12 +49,26 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 	};
 
 	useEffect(() => {
-		refreshUser();
-		const { data: sub } = supabase.auth.onAuthStateChange(() => {
-			refreshUser();
+		const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+			if (event === "TOKEN_REFRESHED") return;
+			if (event === "INITIAL_SESSION") {
+				void applySession(session, true);
+				return;
+			}
+			if (event === "SIGNED_OUT") {
+				void applySession(null, false);
+				return;
+			}
+			void applySession(session, false);
 		});
+
 		return () => sub.subscription.unsubscribe();
 	}, []);
+
+	const refreshUser = async () => {
+		const { data } = await supabase.auth.getSession();
+		await applySession(data.session, false);
+	};
 
 	const login = async (email: string, password: string) => {
 		const { error } = await supabase.auth.signInWithPassword({
@@ -61,7 +76,6 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 			password,
 		});
 		if (error) throw error;
-		await refreshUser();
 	};
 
 	const signup = async (username: string, email: string, password: string) => {
@@ -75,8 +89,6 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 
 	const logout = async () => {
 		await supabase.auth.signOut();
-		setUser(null);
-		setIsAuthenticated(false);
 	};
 
 	return (

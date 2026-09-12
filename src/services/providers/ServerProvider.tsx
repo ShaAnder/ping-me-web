@@ -4,6 +4,7 @@ import { ServerContext } from "../../contexts/ServerContext";
 import { ServerInterface } from "../../@types/server";
 import { fetchMyServers } from "../../api/mapServer";
 import { useUserAuth } from "../../hooks/useUserAuth";
+import { supabase } from "../../api/supabaseClient";
 
 export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 	children,
@@ -14,6 +15,7 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 
 	const refreshServers = useCallback(
 		async (_categoryName?: string) => {
+			void _categoryName;
 			setLoading(true);
 			try {
 				if (!isAuthenticated) {
@@ -29,13 +31,33 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({
 	);
 
 	const addServer = async (_data: any) => {
+		void _data;
 		throw new Error("addServer is not in this slice");
 	};
 
 	useEffect(() => {
 		if (authLoading) return;
-		refreshServers();
+		void refreshServers();
 	}, [authLoading, refreshServers]);
+
+	useEffect(() => {
+		if (!isAuthenticated) return;
+
+		const channel = supabase
+			.channel("servers-live-public")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "servers" },
+				() => {
+					void refreshServers();
+				},
+			)
+			.subscribe();
+
+		return () => {
+			supabase.removeChannel(channel);
+		};
+	}, [isAuthenticated, refreshServers]);
 
 	return (
 		<ServerContext.Provider
