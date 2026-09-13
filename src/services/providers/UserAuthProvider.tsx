@@ -35,7 +35,7 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 		}
 
 		setUser({
-			id: profile.id as unknown as number,
+			id: profile.id,
 			username: profile.username,
 			email: session.user.email ?? "",
 			image: profile.avatar_url ?? "",
@@ -79,7 +79,11 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 
 		// Resolve the profile fetch here rather than trusting the
 		// onAuthStateChange listener to have finished by the time this
-		// resolves
+		// resolves — that listener fires async and independently, so
+		// navigating right after login() used to race it: isAuthenticated
+		// was still false for a moment, ProtectedRoute bounced back to
+		// /login, and the login only "took" on a second attempt once the
+		// first login's background profile fetch had quietly finished.
 		await applySession(data.session, false);
 	};
 

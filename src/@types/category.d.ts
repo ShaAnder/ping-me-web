@@ -1,5 +1,5 @@
 export interface CategoryInterface {
-  id: number;
+  id: string;
   name: string;
   description: string;
   category_icon_url: string;

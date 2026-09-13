@@ -6,7 +6,7 @@ import { supabase } from "../../api/supabaseClient";
 interface AddChannelProps {
 	open: boolean;
 	onClose: () => void;
-	serverId: number;
+	serverId: string;
 	onChannelAdded?: () => void;
 	isOwner: boolean;
 }

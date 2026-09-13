@@ -1,7 +1,7 @@
 import { UserInterface } from "./user";
 
 export interface MessageTypeInterface {
-  id: number;
+  id: string;
   user: UserInterface;
   content: string;
   timestamp_created: string;

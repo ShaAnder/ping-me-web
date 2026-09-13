@@ -1,5 +1,27 @@
 TESTING.md
 
+> **Reintegration note:** the test log below documents the original Django/Heroku diploma build (v1) and is kept as a historical record. Several of those entries — categories, category filtering — describe features that have **not** been rebuilt on the current Supabase stack yet (see the main README's "Not yet ported" section). Treat everything below the divider as v1 history, not a current-state claim. See [Current stack status](#current-stack-status-v2) at the top of this file for what's actually true today.
+
+## Current stack status (v2)
+
+Confirmed via `tsc -b` + `vite build` + full-repo grep, this session (no live Supabase project was available to click through end-to-end — treat the "Not manually verified" rows as open items):
+
+| Area                                                         | Status                                                                                                                                                                                                                                         |
+| :----------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Automated tests                                              | Vitest + React Testing Library, 13 tests across `validateForm`, `Form`, and `Modal` — all confirmed passing, run in CI on every push/PR (`.github/workflows/ci.yml`: lint + typecheck + build + test)                                          |
+| `id` typing                                                  | Server/channel/user/message/category IDs were typed `number` while actually holding UUID strings (`as unknown as number` casts throughout). Fixed to `string` end-to-end; `tsc -b` surfaced 8 knock-on spots, all fixed, zero remaining errors |
+| Signup / login / logout                                      | Rewired to Supabase Auth; login race condition (had to log in twice) fixed                                                                                                                                                                     |
+| Password reset / resend verification                         | Rewired to `supabase.auth.resetPasswordForEmail` / `.resend()`                                                                                                                                                                                 |
+| Delete account                                               | Edge Function (`delete-user`) + FK cascade fix; confirmed working live                                                                                                                                                                         |
+| Create/join/leave server, owner transfer                     | Unchanged from earlier v2 work, not re-verified this session                                                                                                                                                                                   |
+| Real-time messaging, edit/delete own message                 | Present in code with matching RLS; **not manually re-verified live this session**                                                                                                                                                              |
+| Delete channel, rename channel                               | Delete was a non-functional stub, now wired to a real delete call with previously-missing RLS added and a UUID-comparison bug fixed that silently hid the delete button; rename added with its own RLS; **not manually verified live yet**     |
+| Invite links, server dropdown menu, permanent member sidebar | Added this session — join-by-link, consolidated server actions menu, always-visible desktop member list; **not manually verified live yet**                                                                                                    |
+| Categories, private servers, DMs, presence                   | Not implemented on v2 — see README                                                                                                                                                                                                             |
+| axios / JWT / Heroku references                              | Zero remaining, confirmed by full-repo grep                                                                                                                                                                                                    |
+
+---
+
 Testing file for the ping me PP5 frontend app, this testing file is split into three major parts, testing validation and bugs
 
 ## Testing

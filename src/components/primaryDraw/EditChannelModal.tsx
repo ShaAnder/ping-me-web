@@ -7,11 +7,11 @@ import { supabase } from "../../api/supabaseClient";
 interface EditChannelModalProps {
 	open: boolean;
 	onClose: () => void;
-	channel: { id: number; name: string } | null;
+	channel: { id: string; name: string } | null;
 	onUpdated?: () => void;
 	// Called after a successful delete — parent decides whether to
 	// navigate away (e.g. if this was the currently active channel).
-	onDeleted?: (channelId: number) => void;
+	onDeleted?: (channelId: string) => void;
 }
 
 const EditChannelModal: React.FC<EditChannelModalProps> = ({
@@ -101,8 +101,8 @@ const EditChannelModal: React.FC<EditChannelModalProps> = ({
 				}
 			>
 				<Typography>
-					Are you sure you want to delete <b>#{channel.name}</b>? This cannot
-					be undone.
+					Are you sure you want to delete <b>#{channel.name}</b>? This cannot be
+					undone.
 				</Typography>
 				{error && (
 					<Box sx={{ color: "error.main", mt: 2, fontSize: 14 }}>{error}</Box>

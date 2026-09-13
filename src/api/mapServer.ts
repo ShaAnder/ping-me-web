@@ -22,7 +22,7 @@ export function mapServer(
 	channels: ChannelRow[],
 ): ServerInterface {
 	return {
-		id: server.id as unknown as number,
+		id: server.id,
 		name: server.name,
 		server: server.name,
 		description: server.description ?? "",
@@ -30,17 +30,17 @@ export function mapServer(
 		category_name: "",
 		created_at: server.created_at,
 		owner: server.owner_id ?? "",
-		owner_id: server.owner_id as unknown as number,
+		owner_id: server.owner_id ?? "",
 		server_image_urls: {
 			server_icon_url: server.icon_url ?? "",
 			banner_image_url: server.banner_url ?? "",
 		},
 		channel_server: channels.map((c) => ({
-			id: c.id as unknown as number,
+			id: c.id,
 			name: c.name,
-			server: server.id as unknown as number,
+			server: server.id,
 			topic: "",
-			owner: 0,
+			owner: "",
 			type: "text",
 		})),
 	};

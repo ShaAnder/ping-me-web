@@ -10,7 +10,7 @@ Ping me is a lightweight discord clone that allows the user to view signup and j
 
 > **Reintegration note:** this project originally shipped on a Django REST Framework backend with a Code Institute-provided Postgres database, hosted on Heroku. When the diploma database and Heroku hosting were retired, the backend was reintegrated onto **Supabase** (Postgres, Auth, Realtime, Storage, Edge Functions), with the frontend now deployed on **Vercel**. The sections below describe the app as it stands today post-reintegration; the original Django backend is kept in `legacy/` for reference. Everything about the site objectives, design, and UX below still reflects the original vision — only the plumbing underneath changed.
 
-Visit the deployed site! - [PingMe!](ping-me-pp5.vercel.app)
+Visit the deployed site! - [PingMe!](https://your-app.vercel.app) <!-- TODO: replace with your actual Vercel URL -->
 
 Original diploma-era deploy (Django/Heroku, retired): ~~[PingMe!](https://ping-me-pp5-frontend-c34a5313765d.herokuapp.com)~~
 
@@ -266,6 +266,8 @@ Here are the technologies used to build this project:
 - [Supabase](https://supabase.com/) Postgres database, Auth, Realtime, Storage, and Edge Functions — replaced ElephantSQL/Cloudinary/Django post-reintegration
 - [Vercel](https://vercel.com/) Used to deploy the frontend — replaced Heroku post-reintegration
 - [Vite](https://vitejs.dev/) Frontend build tool and dev server
+- [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/react) Unit/component tests, run locally with `npm test`
+- [GitHub Actions](https://github.com/features/actions) CI — lint, typecheck, build, and test on every push/PR (`.github/workflows/ci.yml`)
 
 <details>
 <summary>Original diploma-era stack (retired)</summary>

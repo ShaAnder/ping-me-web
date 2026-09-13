@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 interface ServerTitleMenuProps {
 	serverName: string;
-	serverId: number;
+	serverId: string;
 	isOwner: boolean;
 	onAddChannel: () => void;
 	onDeleteServer: () => void;

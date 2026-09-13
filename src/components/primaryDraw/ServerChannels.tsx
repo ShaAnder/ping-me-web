@@ -55,7 +55,7 @@ const ServerChannel = ({
 	const [deleteError, setDeleteError] = useState("");
 	const [showAddChannel, setShowAddChannel] = useState(false);
 	const [editingChannel, setEditingChannel] = useState<{
-		id: number;
+		id: string;
 		name: string;
 	} | null>(null);
 	const [inviteCopied, setInviteCopied] = useState(false);

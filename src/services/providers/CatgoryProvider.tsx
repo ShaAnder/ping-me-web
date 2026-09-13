@@ -11,7 +11,7 @@ export const CategoriesProvider: React.FC<{ children: ReactNode }> = ({
 	const refreshCategories = async () => {
 		setCategories([
 			{
-				id: 1,
+				id: "1",
 				name: "servers",
 				description: "Your servers",
 				category_icon_url: "",

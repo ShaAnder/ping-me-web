@@ -1,5 +1,5 @@
 export interface ServerInterface {
-  id: number;
+  id: string;
   name: string;
   server: string;
   description: string;
@@ -8,18 +8,18 @@ export interface ServerInterface {
   created_at: string;
   num_members?: number;
   owner: string;
-  owner_id: number;
+  owner_id: string;
 
   server_image_urls: {
     server_icon_url: string;
     banner_image_url: string;
   };
   channel_server: {
-    id: number;
+    id: string;
     name: string;
-    server: number;
+    server: string;
     topic: string;
-    owner: number;
+    owner: string;
     type: string;
   }[];
 }

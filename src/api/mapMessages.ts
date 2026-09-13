@@ -13,12 +13,12 @@ export type MessageRow = {
 export function mapMessage(row: MessageRow): MessageTypeInterface {
 	const username = row.profiles?.username ?? "unknown";
 	return {
-		id: row.id as unknown as number,
+		id: row.id,
 		content: row.content,
 		timestamp_created: row.created_at,
 		timestamp_updated: row.updated_at,
 		user: {
-			id: row.sender_id as unknown as number,
+			id: row.sender_id,
 			username,
 			email: "",
 			image: "",
