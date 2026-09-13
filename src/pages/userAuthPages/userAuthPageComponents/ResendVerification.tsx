@@ -24,6 +24,9 @@ const ResendVerificationButton: React.FC = () => {
 			const { error } = await supabase.auth.resend({
 				type: "signup",
 				email,
+				options: {
+					emailRedirectTo: `${window.location.origin}/login`,
+				},
 			});
 			if (error) throw error;
 			setSuccess(true);

@@ -97,7 +97,16 @@ export const UserAuthProvider: React.FC<{ children: ReactNode }> = ({
 		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
-			options: { data: { username } },
+			options: {
+				data: { username },
+				// Without this, Supabase falls back to the dashboard's Site
+				// URL for the confirmation link's redirect target - if that's
+				// unset or stale, the token still verifies successfully
+				// server-side, but the redirect back into the app fails or
+				// shows a broken-looking page even though confirmation
+				// actually succeeded.
+				emailRedirectTo: `${window.location.origin}/login`,
+			},
 		});
 		if (error) throw error;
 		return data.session === null;
