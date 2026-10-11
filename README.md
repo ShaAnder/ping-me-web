@@ -10,7 +10,7 @@ Ping me is a lightweight discord clone that allows the user to view signup and j
 
 > **Reintegration note:** this project originally shipped on a Django REST Framework backend with a Code Institute-provided Postgres database, hosted on Heroku. When the diploma database and Heroku hosting were retired, the backend was reintegrated onto **Supabase** (Postgres, Auth, Realtime, Storage, Edge Functions), with the frontend now deployed on **Vercel**. The sections below describe the app as it stands today post-reintegration; the original Django backend is kept in `legacy/` for reference. Everything about the site objectives, design, and UX below still reflects the original vision — only the plumbing underneath changed.
 
-Visit the deployed site! - [PingMe!]([https://your-app.vercel.app](https://ping-me-ls8qzbca0-shaander.vercel.app/login)) 
+Visit the deployed site! - [PingMe!](https://ping-me-ls8qzbca0-shaander.vercel.app/login) 
 
 Original diploma-era deploy (Django/Heroku, retired): ~~[PingMe!](https://ping-me-pp5-frontend-c34a5313765d.herokuapp.com)~~
 
